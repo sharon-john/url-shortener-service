@@ -35,12 +35,10 @@ class URLShortener:
     Generates a 6 character short code that represents the path in a URL
     """
     def _generate_short_code(self, url):
-        short_code = "" 
         if url not in self.long_url_mapping:
-            # if the resulting short code is not unique, produce it again 
-            while short_code not in self.short_url_mapping:
-                while (len(short_code) < 6):
-                    short_code += random.choice(URLShortener.short_url_character_set)
+            short_code = ""
+            while (len(short_code) < 6):
+                short_code += random.choice(URLShortener.short_url_character_set)
         
         return short_code
     
