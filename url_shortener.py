@@ -53,7 +53,7 @@ class URLShortener:
         while (len(short_code) < 6 or short_code in self.short_url_mapping):
             short_code = self._generate_short_code(long_url)
 
-        short_url = self.default_domain + "/" + short_code  
+        short_url = self.default_domain.rstrip("/") + "/" + short_code
         
         self.long_url_mapping[long_url] = short_url 
         # store the short url to its underlying long URL
