@@ -30,6 +30,9 @@ class URLShortener:
     
     def set_default_domain(self, domain):
         self.default_domain = domain 
+    
+    def get_default_domain(self):
+        return self.default_domain
 
     """
     Generates a 6 character-length base62 short code that represents the path in a URL
@@ -90,12 +93,13 @@ class URLShortener:
     """
     Retrieves the long URL by short URL and increments the click count if it exists. Throws a KeyError if short URL doesn't exist.  
     """
-    def get_url(self, short_url):
+    def get_url(self, short_url, increment_click_count = False):
         url_and_click_count = self.short_url_mapping.get(short_url, -1)
         if url_and_click_count == -1:
             raise KeyError
         
-        self.short_url_mapping[short_url][1] += 1 
+        if increment_click_count:
+            self.short_url_mapping[short_url][1] += 1 
 
         return self.short_url_mapping[short_url]
 
