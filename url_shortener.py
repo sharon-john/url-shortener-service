@@ -1,4 +1,5 @@
 import random 
+from urllib.parse import urlparse, parse_qsl, urlencode, urlunparse
 
 class URLShortener:
     # shortened URL paths will only contain characters from the following sets: (a-z),(A-Z), (0-9)
@@ -30,9 +31,8 @@ class URLShortener:
     def set_default_domain(self, domain):
         self.default_domain = domain 
 
-
     """
-    Generates a 6 character short code that represents the path in a URL
+    Generates a 6 character-length base62 short code that represents the path in a URL
     """
     def _generate_short_code(self, url):
         if url not in self.long_url_mapping:
@@ -46,6 +46,33 @@ class URLShortener:
     Generates a new short URL if it's a new long url or fetches an existing short URL
     """
     def shorten_url(self, long_url):
+        # default scheme to http and allow fragments incase user wants to link two parts of a p
+        parsed_long_url = urlparse(long_url, scheme="http", allow_fragments=True)
+
+        # scheme and domain should be case-insensitive as per DNS 
+        scheme = parsed_long_url.scheme.lower() 
+        domain = parsed_long_url.netloc.lower() 
+
+        # only supporting standard HTTP URLs 
+        if scheme not in ["http", "https"]:
+            raise Exception("Scheme not supported by URL shortener service")
+        if len(domain) < 1 or len(domain) > 255:
+            raise Exception("Domain is longer than RFC permits")
+
+        # query parameters should be sorted to preserve uniqueness across differently ordered but identical query parameters 
+        sorted_query_params = urlencode(sorted(parse_qsl(parsed_long_url.query))) if parsed_long_url.query else ""
+
+        long_url = urlunparse(
+            (
+                scheme,
+                domain,
+                parsed_long_url.path, 
+                parsed_long_url.params,
+                sorted_query_params,
+                parsed_long_url.fragment
+            )
+        )
+
         if long_url in self.long_url_mapping:
             return False, self.long_url_mapping[long_url]
 
@@ -54,7 +81,7 @@ class URLShortener:
             short_code = self._generate_short_code(long_url)
 
         short_url = self.default_domain.rstrip("/") + "/" + short_code
-        
+
         self.long_url_mapping[long_url] = short_url 
         # store the short url to its underlying long URL
         self.short_url_mapping[short_url] = [long_url, 0]
