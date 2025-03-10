@@ -1,6 +1,7 @@
 from flask import Flask, request, make_response, redirect
 import url_shortener
 from urllib import parse 
+import os 
 
 app = Flask(__name__)
 
@@ -53,4 +54,5 @@ def handle_url_request(path):
         return make_response(f"Unknown URL. If you intended to shorten this long URL, send to {request.host_url}shorten?url=<url> instead", HTTP_NOT_FOUND)
 
 if __name__ == "__main__":
-    app.run(debug=True, port=8080)
+    port = os.getenv("PORT", "8080")
+    app.run(debug=True, port=port)
