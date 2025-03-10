@@ -1,4 +1,4 @@
-from flask import Flask, request, make_response, jsonify, redirect
+from flask import Flask, request, make_response, redirect
 import url_shortener
 from urllib import parse 
 
@@ -16,8 +16,8 @@ HTTP_OK, HTTP_REDIRECT, HTTP_CLIENT_ISSUE, HTTP_NOT_FOUND, HTTP_SERVER_ERROR = 2
 @app.route('/')
 def home():
     # set the domain the server ended up being serve at:  
-    url_library.set_default_domain(request.base_url)
-    return f"Welcome to Sharon's URL shortener service! <br> In order to shorten a URL, please pass it as a query parameter (?url) to the /shorten path. This will produce a new, short URL at {request.base_url}", HTTP_OK
+    url_library.set_default_domain(request.host_url)
+    return f"<b> Welcome to Sharon's URL shortener service! </b> <br> <br> In order to shorten a URL, please pass it as a query parameter (?url) to the /shorten path. This will produce a new short URL at <b> {request.host_url} </b>", HTTP_OK
 
 @app.route("/shorten", methods = ["GET"])
 def shorten():
@@ -30,11 +30,11 @@ def shorten():
     try:
         newly_shortened, short_url = url_library.shorten_url(decoded_long_url)
         if newly_shortened:
-            return make_response(f"Long URL <b> {long_url} <b> is now accessible from the short URL <b> {short_url} </b>", HTTP_OK)
+            return make_response(f"Long URL <b> {long_url} </b> is now accessible from the short URL <b> {short_url} </b>", HTTP_OK)
         else:
-            return make_response(f"Long URL <b> {long_url} has already been shortened to short URL <b> {short_url} </b>", HTTP_OK)
+            return make_response(f"Long URL <b> {long_url} </b> has already been shortened to short URL <b> {short_url} </b>", HTTP_OK)
     except Exception as e:
-        return make_response(f"URL shortening failed because: <br> {e}")
+        return make_response(f"URL shortening failed because: <br> <br> <b> {e} </b>")
 
 @app.route('/<path:path>', methods = ["GET"])
 def handle_url_request(path):
@@ -42,15 +42,15 @@ def handle_url_request(path):
     # the resulting content in response will only be seen if the long URL is hosted on this server 
     if request.base_url in url_library.long_url_mapping:
         click_count = request.args.get("click-count")
-        return make_response(f"URL {path} has been clicked {click_count} times via its short URL", HTTP_OK)
+        return make_response(f"<b> URL {request.base_url} </b> has been clicked <b> {click_count} </b> times via its short URL", HTTP_OK)
     
     # request is routing to a short URL
-    elif request.base_url  in url_library.short_url_mapping:
+    elif request.base_url in url_library.short_url_mapping:
         url_info = url_library.get_url(request.base_url) 
         return redirect(url_info[0] + f"?click-count={url_info[1]}", code=HTTP_REDIRECT)
     
     else:
-        return make_response(f"Unknown URL. If you intended to shorten this long URL, send to {request.base_url}shorten?url=<url> instead", HTTP_NOT_FOUND)
+        return make_response(f"Unknown URL. If you intended to shorten this long URL, send to {request.host_url}shorten?url=<url> instead", HTTP_NOT_FOUND)
 
 if __name__ == "__main__":
     app.run(debug=True, port=8080)

@@ -58,7 +58,7 @@ class URLShortener:
             raise Exception("Scheme not supported by URL shortener service")
         if len(domain) < 1 or len(domain) > 255:
             raise Exception("Domain is longer than RFC permits")
-
+                            
         # query parameters should be sorted to preserve uniqueness across differently ordered but identical query parameters 
         sorted_query_params = urlencode(sorted(parse_qsl(parsed_long_url.query))) if parsed_long_url.query else ""
 
