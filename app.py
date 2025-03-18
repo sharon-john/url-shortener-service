@@ -10,7 +10,6 @@ localhost = "127.0.0.1"
 global url_library
 url_library = url_shortener.URLShortener(localhost)
 
-RESPONSE_SUCCESS, RESPONSE_ERROR, RESPONSE_WARNING = "success", "error", "warning"
 # Hardcoding custom constants here because Flask doesn't seem to provide these in a convenient way
 HTTP_OK, HTTP_REDIRECT, HTTP_CLIENT_ISSUE, HTTP_NOT_FOUND, HTTP_SERVER_ERROR = 200, 302, 400, 404, 500 
 
@@ -18,7 +17,20 @@ HTTP_OK, HTTP_REDIRECT, HTTP_CLIENT_ISSUE, HTTP_NOT_FOUND, HTTP_SERVER_ERROR = 2
 def home():
     # set the domain the server ended up being served at:  
     url_library.set_default_domain(request.host_url)
-    return f"<b> Welcome to Sharon's URL shortener service! </b> <br> <br> The following routes are available: <br> <br> <b> GET /shorten?url=url </b> Please pass full URLs in the query parameter. This will produce a new short URL at <b> {request.host_url} </b> <br> <b> GET /getOriginal?url=url </b>. Pass a full shortened URL to get back the original. <br> Any other GET /route request will be interpreted as a query for a short URL and redirected if available with its click count.  ", HTTP_OK
+    api_documentation = f"""
+    <b> Welcome to Sharon's URL shortener service! </b> 
+    <br> <br> 
+    The following routes are available: 
+    <br> <br> 
+    <b> GET /shorten?url=url </b> Please pass full URLs in the query parameter. This will produce a new short URL at <b> {request.host_url} </b> <br> 
+
+    <b> GET /getOriginal?url=url </b>. Pass a full shortened URL to get back the original. <br><br> 
+
+    <b> Other GET requests </b> <br> 
+    Any other GET /route request will be interpreted as a query for a short URL and redirected if available with its click count.  
+    """
+
+    return api_documentation, HTTP_OK
 
 @app.route("/shorten", methods = ["GET"])
 def shorten():

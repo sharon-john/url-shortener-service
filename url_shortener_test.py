@@ -126,8 +126,6 @@ class URLShortenerTest(unittest.TestCase):
         self.assertEqual(URLShortenerTest.short_url_path_size, len(domain_and_path[1]))
 
         self.assertNotEqual(short_url, short_url2)
-
-        print(short_url, short_url2)
         
 if __name__ == '__main__':
     unittest.main()
