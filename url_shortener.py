@@ -1,32 +1,15 @@
-import random 
+import base64 
+import hashlib 
 from urllib.parse import urlparse, parse_qsl, urlencode, urlunparse
 
 class URLShortener:
-    # shortened URL paths will only contain characters from the following sets: (a-z),(A-Z), (0-9)
-    # other base64 characters are not URL compatible 
-    lowercase_min_range = ord('a')
-    lowercase_max_range = ord('z')
-
-    uppercase_min_range = ord('A')
-    uppercase_max_range = ord('Z')
-
-    numeric_min_range, numeric_max_range = 1, 9
+    # salt to make it so that short URLs cannot be guessed from their long URLs 
+    salt = "randomstring"
 
     def __init__(self, default_domain=""):
         self.long_url_mapping = dict()
         self.short_url_mapping = dict()
-        self.default_domain = default_domain
-
-        # build up the short url character set
-        URLShortener.short_url_character_set = []
-        
-        # build up the character set (essentially base62) from 3 different constituent character sets 
-        URLShortener.short_url_character_set.extend([chr(i) for i in range(URLShortener.lowercase_min_range, URLShortener.lowercase_max_range+1)])
-        URLShortener.short_url_character_set.extend([chr(i) for i in range(URLShortener.uppercase_min_range, URLShortener.uppercase_max_range+1)])
-        URLShortener.short_url_character_set.extend([str(i) for i in range(URLShortener.numeric_min_range, URLShortener.numeric_max_range+1)])
-        
-        # shuffle the character set for more randomization 
-        random.shuffle(URLShortener.short_url_character_set)
+        self.default_domain = default_domain 
     
     def set_default_domain(self, domain):
         self.default_domain = domain 
@@ -39,11 +22,13 @@ class URLShortener:
     """
     def _generate_short_code(self, url):
         if url not in self.long_url_mapping:
-            short_code = ""
-            while (len(short_code) < 6):
-                short_code += random.choice(URLShortener.short_url_character_set)
-        
-        return short_code
+            # md5 hash the URL and salt 
+            string_to_hash = url + URLShortener.salt 
+            hash = hashlib.md5(string_to_hash.encode("utf-8")).hexdigest()
+            # encode the hashed contents to url safe base64 
+            bytes = base64.urlsafe_b64encode(hash.encode("utf-8"))
+            # finally truncate the result and choose the first 6 characters
+            return bytes.decode('utf-8')[0:6]
     
     """
     Generates a new short URL if it's a new long url or fetches an existing short URL
@@ -80,8 +65,13 @@ class URLShortener:
             return False, self.long_url_mapping[long_url]
 
         short_code = ""
+        num_runs = 0
         while (len(short_code) < 6 or short_code in self.short_url_mapping):
+            # if we encountered a collision, add a counter to the end of the URL and retry 
+            if num_runs > 0:
+                long_url = long_url + str(num_runs)
             short_code = self._generate_short_code(long_url)
+            num_runs += 1 
 
         short_url = self.default_domain.rstrip("/") + "/" + short_code
 
