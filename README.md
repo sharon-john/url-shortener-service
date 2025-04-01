@@ -1,7 +1,5 @@
 # url-shortener-service
 
-Hello Actuate Team!
-
 This repository implements a prototype of a URL shortener HTTP server as per the provided spec. It implements this in Python using the Flask microframework. All dependencies are encapsulated in a self-contained Python virtual environment. `flask` is the only non-standard library used in this project. 
 
 ## running the server 
