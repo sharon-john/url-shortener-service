@@ -44,8 +44,6 @@ Unit tests have been provided for the `url_shortener.py` library and can be run 
 
 3) No persistent storage was implemented for simplicity. The short URL, long URLs, and click counts are maintained as 2 Python in-memory dictionary data structures (hash maps). This provides fast lookups to a particular long URL by its short URL and vice versa. Since this is in-memory, a reboot of the server will lose all data. An extension of this project for production would persist these data structures to disk either periodically or with write-through semantics. A key-value database such as Memcached or Redis would be ideal for this. 
 
-Thanks for your time!
-
 
 
 
